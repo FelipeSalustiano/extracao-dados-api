@@ -1,0 +1,55 @@
+Explicação do código 
+Autor: Felipe Salustiano
+
+1) Imports
+-------------------------
+import requests
+import pandas as pd
+from time import sleep
+
+- requests: biblioteca para fazer requisições HTTP. Usada para chamar a API.
+- pandas: biblioteca para manipulação de dados.
+- sleep: função da biblioteca time usada para fazer pausas em segundos.
+
+2) Função data_api
+------------------------------------------
+Objetivo: extrair dados paginados da API e salvar cada página como JSON, além de retornar um dataframe com todos os resultados, para posteriormente fazer a modularização em parquet.
+
+Parâmetros:
+- url: endpoint inicial da API.
+- token: token de autenticação.
+- paginas: número máximo de páginas a baixar.
+
+Passo a passo interno:
+- headers = {'Authorization': f'Token {token}'}: monta o cabeçalho de autenticação que será enviado em cada requisição.
+- dados = []: lista que acumula todos os resultados recebidos de cada página.
+- pagina = 1: contador de páginas baixadas.
+- Loop while pagina <= paginas: continua até atingir o número máximo de páginas definido.
+
+  Dentro do loop:
+  - requests.get(url, headers=headers): faz a chamada HTTP à URL atual.
+  - Se response.status_code == 429: a API está limitando requisições. O código imprime mensagem e usa sleep(30) para esperar 30 segundos antes de tentar novamente, e o continue faz o loop reexecutar sem incrementar pagina.
+  - Se response.status_code != 200: imprime erro com o código HTTP e sai do loop.
+  - data = response.json(): converte resposta JSON para dicionário Python.
+  - resultados = data.get('results', []): extrai a lista de resultados que está com o nome 'results'.
+  - dados.extend(resultados): adiciona os resultados na lista 'dados'.
+  - url = data.get('next'): atualiza a variável url para o link da próxima página. 
+  - df_temp = pd.DataFrame(resultados): cria um DataFrame temporário com os resultados da página atual.
+  - df_temp.to_json(f'dataset/raw/pagina_{pagina}.json', orient='records'): salva os resultados daquela página como um arquivo JSON.
+  - pagina += 1: incrementa contador de página.
+
+Ao final:
+- Imprime o total de itens coletados e a pasta onde os JSONs foram salvos.
+- Constrói um DataFrame final df = pd.DataFrame(dados) com todos os registros e o retorna.
+
+3) Função modularization(df)
+----------------------------
+Objetivo: salvar o DataFrame em formato parquet e particionar os arquivos por colunas 'ano' e 'mes'.
+
+- df.to_parquet('dataset/bronze', index=False, partition_cols=['ano', 'mes']):
+  - Na pasta 'dataset/bronze' os arquivos são salvoas em parquet particionados por ano e mês.
+
+4) Bloco main (if __name__ == '__main__')
+-----------------------------------------
+- Esse bloco garante que o código só execute quando o script for rodado diretamente. É o ínicio do programa.
+- Chama as funções que criei: data_api e modularization.
