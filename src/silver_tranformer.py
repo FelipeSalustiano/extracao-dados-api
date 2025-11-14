@@ -35,7 +35,7 @@ def data_processing(df):
 
     # Preenchimento de dados nulos
     for col in df.columns:
-        if df[col].dtype in ['object', 'str']:
+        if df[col].dtype == 'object':
             df[col] = df[col].fillna('Not informed')
 
         elif df[col].dtype in ['float64', 'int64', 'float32','int32']:

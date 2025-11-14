@@ -49,7 +49,7 @@ def modularization(df, path):
     df.to_parquet(path, index=False, partition_cols=['ano', 'mes'])
 
     print('Modularização concluída!')
-    print('Arquivos salvos em: dataset/bronze')
+    print(f'Arquivos salvos em: {path}')
     
 # Main (Iniciar programa)
 if __name__ == '__main__': 
@@ -57,5 +57,5 @@ if __name__ == '__main__':
     print('============== INICIANDO PROGRAMA  ==============')
     sleep(2)
 
-    data = data_api('https://brasil.io/api/v1/dataset/gastos-diretos/gastos/data', '017d9c6aff5c7e3f7ee79edbeb518c8fe0507d10', paginas=1000)
-    modularization(data, 'dataset\bronze')
+    data = data_api('https://brasil.io/api/v1/dataset/gastos-diretos/gastos/data', '017d9c6aff5c7e3f7ee79edbeb518c8fe0507d10', paginas=10)
+    modularization(data, 'dataset/bronze')
