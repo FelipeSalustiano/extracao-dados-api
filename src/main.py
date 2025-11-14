@@ -2,8 +2,6 @@ import requests
 import pandas as pd
 from time import sleep
 
-# FUNÇÕES 
-
 # Extração dos dados da API
 def data_api(url, token, paginas):
     headers = {'Authorization': f'Token {token}'}
@@ -45,10 +43,10 @@ def data_api(url, token, paginas):
 
 
 # Tranfomando para parquet e modularizando por ano e mes
-def modularization(df):
+def modularization(df, path):
     print('Iniciando modularização por ano e mês...')
 
-    df.to_parquet('dataset/bronze', index=False, partition_cols=['ano', 'mes'])
+    df.to_parquet(path, index=False, partition_cols=['ano', 'mes'])
 
     print('Modularização concluída!')
     print('Arquivos salvos em: dataset/bronze')
@@ -60,4 +58,4 @@ if __name__ == '__main__':
     sleep(2)
 
     data = data_api('https://brasil.io/api/v1/dataset/gastos-diretos/gastos/data', '017d9c6aff5c7e3f7ee79edbeb518c8fe0507d10', paginas=1000)
-    modularization(data)
+    modularization(data, 'dataset\bronze')
